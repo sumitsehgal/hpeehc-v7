@@ -27,6 +27,12 @@ Route::group(['prefix'=> 'v1'], function() {
 
     Route::namespace('Api\V1')->middleware('auth:api')->group(function () {
         Route::get('/me', 'AuthController@me');
+
+        Route::group(['prefix'=>'ehc'], function(){
+            Route::get('patients', 'EhcController@patients');
+            Route::get('visitors', 'EhcController@visitors');
+        });
+
     });
 
 });
