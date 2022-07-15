@@ -34,6 +34,10 @@ Route::group(['prefix'=> 'v1'], function() {
         });
 
         Route::get('dashboard', 'DashboardController@index');
+        
+        Route::group(['prefix'=>'states'], function(){
+            Route::get('list', 'StateController@index');
+        });
 
     });
 
