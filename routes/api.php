@@ -33,6 +33,8 @@ Route::group(['prefix'=> 'v1'], function() {
             Route::get('visitors', 'EhcController@visitors');
         });
 
+        Route::get('dashboard', 'DashboardController@index');
+
     });
 
 });
