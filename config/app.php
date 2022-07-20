@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'webroot' => env('WEBROOT_PATH', 'test_path'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

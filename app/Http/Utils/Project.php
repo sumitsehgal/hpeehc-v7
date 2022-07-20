@@ -30,8 +30,7 @@ class Project {
 
 
     public function getWebroot() {
-        $webserver_root = dirname(dirname(__FILE__));
-        $webserver_root = str_replace("\\","/",$webserver_root);
+        $webserver_root = config("app.webroot");
         return $webserver_root;
     }
 
