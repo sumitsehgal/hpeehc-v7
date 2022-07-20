@@ -12,6 +12,8 @@ class DashboardController extends Controller
 {
     public $admin, $project;
 
+    public $categoryBySites, $sitesFromProject;
+
     public function __construct()
     {
         $this->admin = new Admin;
@@ -20,20 +22,24 @@ class DashboardController extends Controller
 
     public function index() {
 
-        $categoryBySites = $this->admin->getSitesByCategory();
-        $sitesFromProject = $this->project->getSites();
-        
+        $this->categoryBySites = $this->admin->getSitesByCategory();
+        $this->sitesFromProject = $this->project->getSites();
 
         return response()->json([
-            'ehc' => 139,
+            'ehc' => $this->getIntersectedSitesByCategory('ehc'),
             'mehc' => 137,
-            'covid' => 50,
-            'vaccination' => 185,
-            'tb' => 11,
-            'coe' => 4,
-            'dv' => 68,
+            'covid' => $this->getIntersectedSitesByCategory('covid'),
+            'vaccination' => $this->getIntersectedSitesByCategory('vaccination'),
+            'tb' => $this->getIntersectedSitesByCategory('tb'),
+            'coe' => $this->getIntersectedSitesByCategory('coe'),
+            'dv' => $this->getIntersectedSitesByCategory('digital village'),
             'opd' => 5194196,
             'patients' => 2766699,
         ]);
     }
+
+    private function getIntersectedSitesByCategory($category) {
+        return  (isset($this->categoryBySites[$category]) && !empty($this->categoryBySites[$category])) ? $this->categoryBySites[$category]->pluck("siteid")->intersect($this->sitesFromProject)->count() : 0;
+    }
+
 }

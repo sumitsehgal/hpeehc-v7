@@ -25,7 +25,7 @@ class Project {
         }
         closedir($dh);
         ksort($this->sites);
-        return $this->sites;
+        return collect($this->sites);
     }
 
 
