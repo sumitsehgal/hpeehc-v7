@@ -34,9 +34,15 @@ Route::group(['prefix'=> 'v1'], function() {
         });
 
         Route::get('dashboard', 'DashboardController@index');
+        Route::get('patient/count', 'PatientController@index');
+        Route::get('visitor/count', 'VisitorController@index');
         
         Route::group(['prefix'=>'states'], function(){
             Route::get('list', 'StateController@index');
+        });
+
+        Route::group(['prefix'=>'partners'], function(){
+            Route::get('list', 'PartnerController@index');
         });
 
     });

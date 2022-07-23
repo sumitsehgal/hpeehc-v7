@@ -4,9 +4,9 @@ namespace App\Http\Utils;
 use Illuminate\Support\Facades\DB;
 
 class Project {
-    protected $sites;
+    protected $sites, $siteDBNames;
 
-    public function getSites() {
+    public function getSites($selectedSites) {
         if(!empty($this->sites)) {
             return $this->sites;
         }
@@ -20,6 +20,9 @@ class Project {
             $sitedir = "$siteBase/$sfname";
             if (!is_dir($sitedir)               ) continue;
             if (!is_file("$sitedir/sqlconf.php")) continue;
+
+            if(!empty($selectedSites) && !in_array($sfname, $selectedSites)) continue;
+
             $this->sites[$sfname] = $sfname;
 
         }
@@ -37,6 +40,22 @@ class Project {
     public function getSiteBase() {
         $OE_SITES_BASE = $this->getWebroot().'/sites';
         return $OE_SITES_BASE;
+    }
+
+    public function getSiteDatabaseNames($selectedSites) {
+        if(!empty($this->siteDBNames)) {
+            return $this->siteDBNames;
+        }
+
+        $sites = $this->getSites($selectedSites);
+        foreach($sites as $site) {
+            $sitedir = $this->getSiteBase().'/'.$site;
+            $databaseDir = $sitedir.'/sqlconf.php';
+            include($databaseDir);
+            $this->siteDBNames[$site] = $dbase;
+        }
+
+        return $this->siteDBNames;
     }
 
 }
