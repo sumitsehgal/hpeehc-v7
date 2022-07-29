@@ -21,13 +21,15 @@ class Project {
             if (!is_dir($sitedir)               ) continue;
             if (!is_file("$sitedir/sqlconf.php")) continue;
 
-            if(!empty($selectedSites) && !in_array($sfname, $selectedSites)) continue;
+            if(!in_array($sfname, $selectedSites)) continue;
 
             $this->sites[$sfname] = $sfname;
 
         }
         closedir($dh);
-        ksort($this->sites);
+        if(!empty($this->sites)) {
+            ksort($this->sites);
+        }
         return collect($this->sites);
     }
 

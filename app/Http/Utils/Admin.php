@@ -17,7 +17,18 @@ class Admin {
         
         if(!empty($this->filters['site_category'])) {
             $site_category = strtolower($this->filters['site_category']);
-            $builder->where('site_category', $site_category);
+            if($site_category != "mobile") {
+                $builder->where('site_category', $site_category);
+            }
+        }
+
+        if(isset($this->filters['state_id']) && !empty($this->filters['state_id'])) {
+            $state_id = $this->filters['state_id'];
+            $builder->where('state_id', $state_id);
+        }
+
+        if(isset($this->filters['partner']) && !empty($this->filters['partner'])) {
+            $builder->where('site_type', $this->filters['partner']);
         }
         
 
@@ -25,28 +36,33 @@ class Admin {
         return $this->sites;
     }
 
+    public function getSitesTitle() {
+        $sites = $this->getSites();
+
+        return $sites->pluck('site_title', 'siteid');
+    }
+
     public function getSitesByCategory() {
         return $this->getSites()->groupBy('site_category');
     }
 
-    public function getPartners($filters) {
+    public function getPartners() {
 
         if(!empty($this->partners)) {
             return $this->partners;
         }
-
-        $filters = array_merge(
-            array(),
-            $filters
-        );
 
         $builder = DB::connection("admin")->table("sites")->select("site_type");
         
         $builder->whereNotNull('site_type')->where("site_type", "!=", "");
 
 
-        if(isset($filters['site_category']) && !empty($filters['site_category'])) {
-            $builder->where('site_category', $filters['site_category']);
+        if(isset($this->filters['site_category']) && !empty($this->filters['site_category']) && strtolower($this->filters['site_category']) != "mobile") {
+            $builder->where('site_category', $this->filters['site_category']);
+        }
+
+        if(isset($this->filters['state_id']) && !empty($this->filters['state_id'])) {
+            $builder->where('state_id', $this->filters['state_id']);
         }
 
 
@@ -73,6 +89,19 @@ class Admin {
         $this->filters = $filters;
     }
 
+    public function getSiteCategoryKeys() {
+        return [
+            'eHC' => 'ehc',
+            'COVID' => 'covid',
+            'COE' => 'coe',
+            'Digital Village' => 'digital village',
+            'TB' => 'tb',
+            'MeHC' => 'mobile',
+            'Vaccination' => 'vaccination'
+        ];
+
+    }
+ 
 }
 
 ?>

@@ -22,17 +22,19 @@ class DashboardController extends Controller
 
     public function index() {
 
+        $sites = $this->admin->getSites()->pluck('siteid')->toArray();
+
         $this->categoryBySites = $this->admin->getSitesByCategory();
-        $this->sitesFromProject = $this->project->getSites([]);
+        $this->sitesFromProject = $this->project->getSites($sites);
 
         return response()->json([
-            'ehc' => $this->getIntersectedSitesByCategory('ehc'),
-            'mehc' => $this->getMobileEhC(),
-            'covid' => $this->getIntersectedSitesByCategory('covid'),
-            'vaccination' => $this->getIntersectedSitesByCategory('vaccination'),
-            'tb' => $this->getIntersectedSitesByCategory('tb'),
-            'coe' => $this->getIntersectedSitesByCategory('coe'),
-            'dv' => $this->getIntersectedSitesByCategory('digital village'),
+            'eHC' => $this->getIntersectedSitesByCategory('ehc'),
+            'MeHC' => $this->getMobileEhC($sites),
+            'COVID' => $this->getIntersectedSitesByCategory('covid'),
+            'Vaccination' => $this->getIntersectedSitesByCategory('vaccination'),
+            'TB' => $this->getIntersectedSitesByCategory('tb'),
+            'COE' => $this->getIntersectedSitesByCategory('coe'),
+            'Digital Village' => $this->getIntersectedSitesByCategory('digital village'),
             // 'opd' => 5194196,
             // 'patients' => 2766699,
         ]);
@@ -42,8 +44,9 @@ class DashboardController extends Controller
         return  (isset($this->categoryBySites[$category]) && !empty($this->categoryBySites[$category])) ? $this->categoryBySites[$category]->pluck("siteid")->intersect($this->sitesFromProject)->count() : 0;
     }
 
-    public function getMobileEhC() {
-        $databases = $this->project->getSiteDatabaseNames([]);
+    public function getMobileEhC($selectedSites) {
+        
+        $databases = $this->project->getSiteDatabaseNames($selectedSites);
         $totalMobileEhc = 0;
         
         if(!empty($databases)) {

@@ -25,10 +25,16 @@ class PartnerController extends Controller
         $filters = [];
 
         if($request->has('site_category')) {
-            $filters['site_category'] = $request['site_category'];
+            $siteKeys = $this->admin->getSiteCategoryKeys();
+            $filters['site_category'] = isset($siteKeys[$request['site_category']]) ? $siteKeys[$request['site_category']] : $request['site_category'];
+        }
+        if($request->has('state_id')) {
+            $filters['state_id'] = $request['state_id'];
         }
 
-        $partners = $this->admin->getPartners($filters);
+        $this->admin->setFilters($filters);
+
+        $partners = $this->admin->getPartners();
         return response()->json([
             'partners' => $partners
         ]);
