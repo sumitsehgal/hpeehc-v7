@@ -104,7 +104,7 @@
                                 <select name="state[]" class="form-control" multiple>
                                     @if($states->isNotEmpty())
                                         @foreach($states as $stateid=>$state_title)
-                                            <option value="{{$stateid}}">{{$state_title}}</option>
+                                            <option value="{{$stateid}}" @if(in_array($stateid, $user->realAssetsByRole('state')->pluck('object_id')->toArray()) ) selected @endif  >{{$state_title}}</option>
                                         @endforeach
                                     @endif
                                 </select>
@@ -116,10 +116,10 @@
                             <label for="sites" class="col-md-2 control-label col-md-offset-2">Select Sites</label>
 
                             <div class="col-md-6">
-                                <select name="sites[]" class="form-control" multiple>
+                                <select name="site[]" class="form-control" multiple>
                                     @if($sites->isNotEmpty())
                                         @foreach($sites as $siteid=>$site_title)
-                                            <option value="{{$siteid}}">{{$site_title}}</option>
+                                            <option value="{{$siteid}}" @if(in_array($siteid, $user->realAssetsByRole('site')->pluck('object_id')->toArray()) ) selected @endif >{{$site_title}}</option>
                                         @endforeach
                                     @endif
                                 </select>

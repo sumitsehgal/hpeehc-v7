@@ -126,7 +126,7 @@
                             <label for="sites" class="col-md-2 control-label col-md-offset-2">Select Sites</label>
 
                             <div class="col-md-6">
-                                <select name="sites[]" class="form-control" multiple>
+                                <select name="site[]" class="form-control" multiple>
                                     @if($sites->isNotEmpty())
                                         @foreach($sites as $siteid=>$site_title)
                                             <option value="{{$siteid}}">{{$site_title}}</option>

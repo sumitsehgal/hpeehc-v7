@@ -72,6 +72,7 @@ class UserController extends Controller
 
         if(!empty($request->role)) {
             $user->assignRole($request->role);
+            $user->saveAssets($request);
         }
 
         return redirect(route('admin.users.index'))->with('status', 'User has been created succesfully!');
@@ -143,6 +144,7 @@ class UserController extends Controller
         }
 
         $user->syncRoles([$request->role]);
+        $user->saveAssets($request);
 
         return redirect(route('admin.users.index'))->with('status', 'User has been updated succesfully!');
     }
