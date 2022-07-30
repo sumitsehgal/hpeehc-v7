@@ -27,8 +27,11 @@ class UserController extends Controller
     {
         $users = User::orderBy('id', 'desc')->paginate();
 
+        $states = $this->admin->getStates(101);
+
         return view('admin.users.index', [
-            'users' => $users
+            'users' => $users,
+            'states' => $states
         ]);
     }
 

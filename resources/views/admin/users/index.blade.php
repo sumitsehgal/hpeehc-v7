@@ -28,6 +28,7 @@
                                 <th scope="col">Email Address</th>
                                 <th scope="col">Username</th>
                                 <th scope="col">Role</th>
+                                <th scope="col">Assets</th>
                                 <th cols="2" scope="col">Actions</th>
                             </tr>
                         </thead>
@@ -40,6 +41,29 @@
                                     <td>{{$user->email}}</td>
                                     <td>{{$user->username}}</td>
                                     <td>{{$user->getRoleNames()->implode(',')}}</td>
+                                    <td>
+                                    @if($user->getRoleNames()->isNotEmpty())
+                                        @foreach($user->getRoleNames() as $role)
+                                           <?php $assets = $user->realAssetsByRole($role)->pluck('object_id');
+                                            if($role == "site") {
+                                                echo $assets->implode(", ");
+                                            }else {
+                                                if(!empty($assets)){
+                                                    $stateData = [];
+                                                    foreach($assets as $asset) {
+                                                        $stateData[] = isset($states[$asset]) ? $states[$asset] : "";
+                                                    }
+                                                    echo implode(", ", $stateData);
+                                                }
+                                                
+                                            }
+
+                                            ?>
+                                           
+
+                                        @endforeach
+                                    @endif
+                                    </td>
                                     <td>
                                         <a href="{{route('admin.users.edit', $user->id)}}" class="btn btn-warning">Edit</a>
                                     </td>
