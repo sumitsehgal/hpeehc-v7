@@ -159,6 +159,7 @@ class PatientController extends Controller
 
         $databases = $this->project->getSiteDatabaseNames($sites);
         $sitesTitle = $this->admin->getSitesTitle();
+        $sitesStatus = $this->admin->getSitesStatus();
 
         $response = [
             'sites' => []
@@ -172,8 +173,9 @@ class PatientController extends Controller
                     $usersTbl =  "{$db}.users";
 
                     $siteTitle = (isset($sitesTitle[$site])) ? $sitesTitle[$site] : $site;
+                    $siteStatus = (isset($sitesStatus[$site])) ? $sitesStatus[$site] : 1;
 
-                    $mainQ = " SELECT count(*) as cnt, {$patientTbl}.sex, '".$site."' AS site_id, '".$siteTitle."' AS site_title FROM {$patientTbl} ";
+                    $mainQ = " SELECT count(*) as cnt, {$patientTbl}.sex, '".$site."' AS site_id, '".$siteTitle."' AS site_title, '".$siteStatus."' AS site_status FROM {$patientTbl} ";
 
                     $joinQ = "";
                     
@@ -211,6 +213,9 @@ class PatientController extends Controller
                                 ];
                             }
                             $response['sites'][$row->site_id]['siteName'] = $row->site_title;
+                            $response['sites'][$row->site_id]['siteStatus'] = $row->site_status;
+
+                            
 
                             if($row->sex == "Male") {
                                 $response['sites'][$row->site_id]["Male"] = $row->cnt;

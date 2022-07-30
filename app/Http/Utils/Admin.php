@@ -14,7 +14,7 @@ class Admin {
             return $this->sites;
         }
 
-        $builder = DB::connection("admin")->table("sites")->select('siteid', 'site_title', 'site_category');
+        $builder = DB::connection("admin")->table("sites")->select('siteid', 'site_title', 'site_category', 'site_active_status');
         
         if(!empty($this->filters['site_category'])) {
             $site_category = strtolower($this->filters['site_category']);
@@ -45,8 +45,6 @@ class Admin {
 
         }
 
-        
-
         $this->sites = $builder->get();
         return $this->sites;
     }
@@ -55,6 +53,12 @@ class Admin {
         $sites = $this->getSites();
 
         return $sites->pluck('site_title', 'siteid');
+    }
+
+    public function getSitesStatus() {
+        $sites = $this->getSites();
+
+        return $sites->pluck('site_active_status', 'siteid');
     }
 
     public function getSitesByCategory() {
