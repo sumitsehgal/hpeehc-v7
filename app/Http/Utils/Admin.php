@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Utils;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class Admin {
@@ -30,6 +31,20 @@ class Admin {
         if(isset($this->filters['partner']) && !empty($this->filters['partner'])) {
             $builder->where('site_type', $this->filters['partner']);
         }
+
+        $loggedUser = Auth::user();
+        if($loggedUser) {
+            if($loggedUser->hasRole('state')) {
+                $stateIds = $loggedUser->realAssetsByRole('state')->pluck('object_id');
+                $builder->whereIn('state_id', $stateIds);
+                
+            }else if($loggedUser->hasRole('site')) {
+                $siteIds = $loggedUser->realAssetsByRole('site')->pluck('object_id');
+                $builder->whereIn('siteid', $siteIds);
+            }
+
+        }
+
         
 
         $this->sites = $builder->get();
@@ -65,6 +80,19 @@ class Admin {
             $builder->where('state_id', $this->filters['state_id']);
         }
 
+        $loggedUser = Auth::user();
+        if($loggedUser) {
+            if($loggedUser->hasRole('state')) {
+                $stateIds = $loggedUser->realAssetsByRole('state')->pluck('object_id');
+                $builder->whereIn('state_id', $stateIds);
+                
+            }else if($loggedUser->hasRole('site')) {
+                $siteIds = $loggedUser->realAssetsByRole('site')->pluck('object_id');
+                $builder->whereIn('siteid', $siteIds);
+            }
+
+        }
+
 
         $this->partners = $builder->distinct()->pluck('site_type', 'site_type');
         return $this->partners;
@@ -79,6 +107,21 @@ class Admin {
         $builder = DB::connection("admin")->table("states")->select("id", "name");
 
         $builder->where('country_id', $country_id);
+
+        $loggedUser = Auth::user();
+        if($loggedUser) {
+            if($loggedUser->hasRole('state')) {
+                $stateIds = $loggedUser->realAssetsByRole('state')->pluck('object_id');
+                $builder->whereIn('id', $stateIds);
+                
+            }else if($loggedUser->hasRole('site')) {
+                $siteIds = $loggedUser->realAssetsByRole('site')->pluck('object_id');
+                $stateIds = DB::connection("admin")->table("sites")->select("state_id")->distinct()->whereIn('siteid', $siteIds)->pluck("state_id");
+                $builder->whereIn('id', $stateIds);
+
+            }
+
+        }
 
         $this->states = $builder->distinct()->pluck('name', 'id');
 
