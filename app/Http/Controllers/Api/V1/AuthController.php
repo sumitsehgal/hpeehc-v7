@@ -10,6 +10,62 @@ use App\User;
 
 class AuthController extends Controller
 {
+
+    public function checkUser(Request $request) {
+
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string|max:255',
+            'role' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return response()->json([
+                'error' => $errors
+            ], 400);
+        }
+        if ($validator->passes()) {
+            $user = User::where(function($q) use($request) {
+                $q->orWhere('username', $request['username'])
+                    ->orWhere('email', $request['email']);
+            })->first();
+
+            if(empty($user)) {
+                $errors = [
+                    'errors' => [
+                        'username' => ['User Not Exists']
+                    ]
+                ];
+                return response()->json($errors, 400);
+            }
+
+            if(!$user->hasRole($request['role'])) {
+                $errors = [
+                    'errors' => [
+                        'role' => ['User Not associated with this Role']
+                    ]
+                ];
+                return response()->json($errors, 400);
+            }
+
+            return response()->json([
+                'success' => true
+            ], 200);
+
+
+        }
+
+        return response()->json([
+            'errors' => [
+                'others' => [
+                    'BAD Request'
+                ]
+            ]
+        ], 400);
+
+
+    }
+
     public function register(Request $request) {
 
          // Validate request data

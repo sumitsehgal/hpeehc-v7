@@ -23,7 +23,7 @@ Route::group(['prefix'=> 'v1'], function() {
     // Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register','Api\V1\AuthController@register');
     
-    
+    Route::post('/check-user', 'Api\V1\AuthController@checkUser');
 
     Route::namespace('Api\V1')->middleware('auth:api')->group(function () {
         Route::get('/me', 'AuthController@me');
