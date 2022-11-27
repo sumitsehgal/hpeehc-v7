@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Utils\Admin;
 use App\Http\Utils\Project;
-use App\Studio;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -31,14 +30,13 @@ class DashboardController extends Controller
         return response()->json([
             'eHC' => $this->getIntersectedSitesByCategory('ehc'),
           //  'MeHC' => $this->getMobileEhC($sites),
-          //  'COVID' => $this->getIntersectedSitesByCategory('covid'),
-            'COVID Vaccination & OPD Center' => $this->getIntersectedSitesByCategory('vaccination'),
-            'TB Screening' => $this->getIntersectedSitesByCategory('tb'),
-            'CoE' => $this->getIntersectedSitesByCategory('coe'),
+            'COVID' => $this->getIntersectedSitesByCategory('covid'),
+            'Vaccination' => $this->getIntersectedSitesByCategory('vaccination'),
+            'TB' => $this->getIntersectedSitesByCategory('tb'),
+            'COE' => $this->getIntersectedSitesByCategory('coe'),
             'Digital Village' => $this->getIntersectedSitesByCategory('digital village'),
             // 'opd' => 5194196,
             // 'patients' => 2766699,
-	        'Studio' => $this->admin->getStudio()->count(),
         ]);
     }
 

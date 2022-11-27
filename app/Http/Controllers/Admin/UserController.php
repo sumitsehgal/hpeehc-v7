@@ -44,9 +44,11 @@ class UserController extends Controller
     {
         $states = $this->admin->getStates(101);
         $sites = $this->admin->getSites()->sortBy('siteid', SORT_NATURAL|SORT_FLAG_CASE)->pluck('site_title', 'siteid');
+        $partners = $this->admin->getPartners();
         return view('admin.users.create', [
             'states' => $states,
-            'sites' => $sites
+            'sites' => $sites,
+            'partners' => $partners
         ]);
     }
 
@@ -70,7 +72,8 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'username' => $request->username,
-            'password' => bcrypt($request->password)
+            'password' => bcrypt($request->password),
+            'hasMapView' => $request->has('hasMapView') ? $request->hasMapView : false
         ]);
 
         if(!empty($request->role)) {
@@ -103,13 +106,15 @@ class UserController extends Controller
     {
         $states = $this->admin->getStates(101);
         $sites = $this->admin->getSites()->sortBy('siteid', SORT_NATURAL|SORT_FLAG_CASE)->pluck('site_title', 'siteid');
+        $partners = $this->admin->getPartners();
 
         $user = User::find($id);
 
         return view('admin.users.edit', [
             'user' => $user,
             'states' => $states,
-            'sites' => $sites
+            'sites' => $sites,
+            'partners' => $partners
         ]);
     }
 
@@ -138,7 +143,8 @@ class UserController extends Controller
         $user->fill([
             'name' => $request->name,
             'email' => $request->email,
-            'username' => $request->username
+            'username' => $request->username,
+            'hasMapView' => $request->has('hasMapView') ? $request->hasMapView : false
         ]);
         $user->save();
         if(!empty(trim($request->password))) {

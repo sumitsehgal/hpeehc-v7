@@ -87,6 +87,14 @@
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label for="hasmapview" class="col-md-2 control-label col-md-offset-2">Map Visibility</label>
+
+                            <div class="col-md-6">
+                                <input id="hasmapview" type="checkbox" class="form-control" name="hasMapView" value="1">
+                            </div>
+                        </div>
+
 
                         <div class="form-group{{ $errors->has('role') ? ' has-error' : '' }}">
                             <label for="role" class="col-md-2 control-label col-md-offset-2">Select Role</label>
@@ -96,6 +104,7 @@
                                     <option value="admin">Admin</option>
                                     <option value="state">State</option>
                                     <option value="site">Site</option>
+                                    <option value="partner">Partner</option>
                                 </select>
 
                                 @if ($errors->has('role'))
@@ -130,6 +139,21 @@
                                     @if($sites->isNotEmpty())
                                         @foreach($sites as $siteid=>$site_title)
                                             <option value="{{$siteid}}">{{$site_title}}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                
+                            </div>
+                        </div>
+
+                        <div class="form-group role-assets" id="partner-asset" style="display: none;">
+                            <label for="partners" class="col-md-2 control-label col-md-offset-2">Select Partners</label>
+
+                            <div class="col-md-6">
+                                <select name="partner[]" class="form-control" multiple>
+                                    @if($partners->isNotEmpty())
+                                        @foreach($partners as $partnertype=>$partnerTitle)
+                                            <option value="{{$partnertype}}">{{$partnerTitle}}</option>
                                         @endforeach
                                     @endif
                                 </select>

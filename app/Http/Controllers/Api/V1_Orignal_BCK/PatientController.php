@@ -41,48 +41,6 @@ class PatientController extends Controller
             $filters['partner'] = $request['partner'];
         }
 
-        $filters['isTimeLimit'] = false;
-        if($request->has('timeLimit')) {
-            if(!empty($request->timeLimit)) {
-                $filters['isTimeLimit'] = true;
-                switch($request->timeLimit) {
-                    case 'LW':
-                       $filters['start_date'] = date('Y-m-d 00:00:00', strtotime('first day of last week')); 
-                       $filters['end_date'] = date('Y-m-d 23:59:59', strtotime('last day of last week')); 
-                        break;
-                    case 'LM':
-                        $filters['start_date'] = date('Y-m-d 00:00:00', strtotime('first day of last month')); 
-                        $filters['end_date'] = date('Y-m-d 23:59:59', strtotime('last day of last month')); 
-                        break;
-
-                    case '3M':
-                        $filters['start_date'] = date('Y-m-d 00:00:00', strtotime('first day of -3 month')); 
-                        $filters['end_date'] = date('Y-m-d 23:59:59', strtotime('last day of -1 month')); 
-                        break;
-                    case '6M':
-                        $filters['start_date'] = date('Y-m-d 00:00:00', strtotime('first day of -6 month')); 
-                        $filters['end_date'] = date('Y-m-d 23:59:59', strtotime('last day of -1 month')); 
-                        break;
-                    case '1Y':
-                        $year = date('Y') - 1;
-                        $filters['start_date'] = date('Y-m-d 00:00:00', strtotime('first day of January '.$year)); 
-                        $filters['end_date'] = date('Y-m-d 23:59:59', strtotime('last day of December '.$year));
-
-                        break;
-                    case 'CY':
-                        $year = date('Y');
-                        $filters['start_date'] = date('Y-m-d 00:00:00', strtotime('first day of January '.$year)); 
-                        $filters['end_date'] = date('Y-m-d 23:59:59', strtotime('last day of December '.$year));
-
-                        break;
-                    default:
-                        $filters['isTimeLimit'] = false;
-                        break;      
-                }
-            }
-
-        }
-
         // Site Filters
         $this->admin->setFilters($filters);
 
@@ -103,7 +61,6 @@ class PatientController extends Controller
             array('start_date' => '1970-01-01 00:00:00', 'end_date' => Carbon::now()->format('Y-m-d 23:59:59') ),
             $filters
         );
-        
 
         $databases = $this->project->getSiteDatabaseNames($sites);
 
@@ -122,11 +79,10 @@ class PatientController extends Controller
                     $mainQ = " SELECT count({$patientTbl}.id) as cnt, {$patientTbl}.sex FROM {$patientTbl} ";
 
                     $joinQ = "";
-                    $whereQ = " ";
-                    if(isset($filters['isTimeLimit']) && $filters['isTimeLimit']) {
-                        $whereQ = " WHERE {$patientTbl}.`date` >= '{$filters['start_date']}' AND {$patientTbl}.`date` <= '{$filters['end_date']}' ";
-                    }
                     
+                    // $whereQ = " WHERE {$patientTbl}.`date` >= '{$filters['start_date']}' AND {$patientTbl}.`date` <= '{$filters['end_date']}' ";
+
+                    $whereQ = " ";
 
                     $otherQ = " GROUP BY {$patientTbl}.sex ";
                     

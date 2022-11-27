@@ -27,13 +27,13 @@ class AuthController extends Controller
         if ($validator->passes()) {
             $user = User::where(function($q) use($request) {
                 $q->orWhere('username', $request['username'])
-                    ->orWhere('email', $request['username']);
+                    ->orWhere('email', $request['email']);
             })->first();
 
             if(empty($user)) {
                 $errors = [
                     'errors' => [
-                        'username' => 'User Does Not Exist'
+                        'username' => 'User Not Exists'
                     ]
                 ];
                 return response()->json($errors, 200);
@@ -41,9 +41,9 @@ class AuthController extends Controller
 
             if(!$user->hasRole($request['role'])) {
                 $errors = [
-                    'errors' =>[ 
-                        'role' => 'User Not associated with this Role'
-			]
+                    'errors' => [
+                        'role' => ['User Not associated with this Role']
+                    ]
                 ];
                 return response()->json($errors, 200);
             }

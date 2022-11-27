@@ -57,6 +57,47 @@
                             </li>
                         </ul>
                     </li>
+                    <li>
+                        <a href="{{route('admin.partners.index')}}">Partners</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" v-pre>
+                            Startup <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="{{ route('admin.startups.index') }}">
+                                    List Startups
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.startups.create') }}">
+                                    Add Startup
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" v-pre>
+                            Studio <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="{{ route('admin.studio.index') }}">
+                                    List Studio
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.studio.create') }}">
+                                    Add Studio
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
                     @endrole
                     @endguest
 

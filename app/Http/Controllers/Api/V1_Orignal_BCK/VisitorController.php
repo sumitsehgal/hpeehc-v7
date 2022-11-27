@@ -9,7 +9,7 @@ use App\Http\Utils\Project;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class PatientController extends Controller
+class VisitorController extends Controller
 {
 
     public $admin, $project;
@@ -22,11 +22,13 @@ class PatientController extends Controller
         $this->project = new Project;
     }
 
+
     public function index(Request $request) {
         $filters = [];
         if($request->has('site_type')) {
             $filters['site_type'] = $request['site_type'];
         }
+
         
         if($request->has('site_category')) {
             $siteKeys = $this->admin->getSiteCategoryKeys();
@@ -41,71 +43,28 @@ class PatientController extends Controller
             $filters['partner'] = $request['partner'];
         }
 
-        $filters['isTimeLimit'] = false;
-        if($request->has('timeLimit')) {
-            if(!empty($request->timeLimit)) {
-                $filters['isTimeLimit'] = true;
-                switch($request->timeLimit) {
-                    case 'LW':
-                       $filters['start_date'] = date('Y-m-d 00:00:00', strtotime('first day of last week')); 
-                       $filters['end_date'] = date('Y-m-d 23:59:59', strtotime('last day of last week')); 
-                        break;
-                    case 'LM':
-                        $filters['start_date'] = date('Y-m-d 00:00:00', strtotime('first day of last month')); 
-                        $filters['end_date'] = date('Y-m-d 23:59:59', strtotime('last day of last month')); 
-                        break;
-
-                    case '3M':
-                        $filters['start_date'] = date('Y-m-d 00:00:00', strtotime('first day of -3 month')); 
-                        $filters['end_date'] = date('Y-m-d 23:59:59', strtotime('last day of -1 month')); 
-                        break;
-                    case '6M':
-                        $filters['start_date'] = date('Y-m-d 00:00:00', strtotime('first day of -6 month')); 
-                        $filters['end_date'] = date('Y-m-d 23:59:59', strtotime('last day of -1 month')); 
-                        break;
-                    case '1Y':
-                        $year = date('Y') - 1;
-                        $filters['start_date'] = date('Y-m-d 00:00:00', strtotime('first day of January '.$year)); 
-                        $filters['end_date'] = date('Y-m-d 23:59:59', strtotime('last day of December '.$year));
-
-                        break;
-                    case 'CY':
-                        $year = date('Y');
-                        $filters['start_date'] = date('Y-m-d 00:00:00', strtotime('first day of January '.$year)); 
-                        $filters['end_date'] = date('Y-m-d 23:59:59', strtotime('last day of December '.$year));
-
-                        break;
-                    default:
-                        $filters['isTimeLimit'] = false;
-                        break;      
-                }
-            }
-
-        }
-
         // Site Filters
         $this->admin->setFilters($filters);
 
         $sites = $this->admin->getSites()->pluck('siteid')->toArray();
 
-        $patientCount = $this->getPatientCount($filters, $sites);
-
+        $visitorCount = $this->getVisitorCount($filters, $sites);
+        
         return response()->json([
-            'Total Patients' => ($patientCount['Male'] + $patientCount['Female']),
-            'male' => $patientCount['Male'],
-            'female' => $patientCount['Female']
+            'Total Visits' => ($visitorCount['Male'] + $visitorCount['Female']),
+            'male' => $visitorCount['Male'],
+            'female' => $visitorCount['Female'],
         ]);
     }
 
-    public function getPatientCount($filters, $sites) {
+    public function getVisitorCount($filters, $selectedSites) {
 
         $filters = array_merge(
             array('start_date' => '1970-01-01 00:00:00', 'end_date' => Carbon::now()->format('Y-m-d 23:59:59') ),
             $filters
         );
-        
 
-        $databases = $this->project->getSiteDatabaseNames($sites);
+        $databases = $this->project->getSiteDatabaseNames($selectedSites);
 
         $response = [
             'Male' => 0,
@@ -113,23 +72,22 @@ class PatientController extends Controller
         ];
 
         if(!empty($databases)) {
-            foreach(array_chunk($databases, 500) as $dbs) {
+            foreach(array_chunk($databases, 300) as $dbs) {
                 $query = [];
                 foreach($dbs as $db) {
                     $patientTbl = "{$db}.patient_data";
+                    $formTbl = "{$db}.form_encounter";
                     $usersTbl =  "{$db}.users";
 
-                    $mainQ = " SELECT count({$patientTbl}.id) as cnt, {$patientTbl}.sex FROM {$patientTbl} ";
+                    $mainQ = " SELECT count({$formTbl}.id) as cnt, {$patientTbl}.sex FROM {$patientTbl} ";
 
-                    $joinQ = "";
+                    $joinQ = " INNER JOIN {$formTbl} ON {$patientTbl}.pid = {$formTbl}.pid ";
+
                     $whereQ = " ";
-                    if(isset($filters['isTimeLimit']) && $filters['isTimeLimit']) {
-                        $whereQ = " WHERE {$patientTbl}.`date` >= '{$filters['start_date']}' AND {$patientTbl}.`date` <= '{$filters['end_date']}' ";
-                    }
-                    
+                    // $whereQ = " WHERE {$formTbl}.`date` >= '{$filters['start_date']}' AND {$formTbl}.`date` <= '{$filters['end_date']}' ";
 
                     $otherQ = " GROUP BY {$patientTbl}.sex ";
-                    
+
                     if( isset($filters['site_category']) && !empty($filters['site_category']) ) {
 
                         $userType = (strtolower($filters['site_category']) != "mobile") ? "EHC" : "MOBILE";
@@ -138,8 +96,8 @@ class PatientController extends Controller
 
                     }
 
-
                     $query[] = $mainQ.$joinQ.$whereQ.$otherQ;
+
                 }
 
                 if(!empty($query)) {
@@ -160,6 +118,7 @@ class PatientController extends Controller
         }
 
         return $response;
+
     }
 
     public function sitewise(Request $request) {
@@ -167,6 +126,7 @@ class PatientController extends Controller
         if($request->has('site_type')) {
             $filters['site_type'] = $request['site_type'];
         }
+
         
         if($request->has('site_category')) {
             $siteKeys = $this->admin->getSiteCategoryKeys();
@@ -186,22 +146,19 @@ class PatientController extends Controller
 
         $sites = $this->admin->getSites()->pluck('siteid')->toArray();
 
-        $patientCount = $this->getPatientSiteWise($filters, $sites);
-
-        return response()->json($patientCount);
-
+        $visitorCount = $this->getVisitorSitewise($filters, $sites);
+        
+        return response()->json($visitorCount);
 
     }
 
-
-    public function getPatientSiteWise($filters, $sites) {
-
+    public function getVisitorSitewise($filters, $selectedSites) {
         $filters = array_merge(
             array('start_date' => '1970-01-01 00:00:00', 'end_date' => Carbon::now()->format('Y-m-d 23:59:59') ),
             $filters
         );
 
-        $databases = $this->project->getSiteDatabaseNames($sites);
+        $databases = $this->project->getSiteDatabaseNames($selectedSites);
         $sitesTitle = $this->admin->getSitesTitle();
         $sitesStatus = $this->admin->getSitesStatus();
 
@@ -210,25 +167,25 @@ class PatientController extends Controller
         ];
 
         if(!empty($databases)) {
-            foreach(array_chunk($databases, 100, true) as $dbs) {
+            foreach(array_chunk($databases, 300, true) as $dbs) {
                 $query = [];
                 foreach($dbs as $site=>$db) {
                     $patientTbl = "{$db}.patient_data";
+                    $formTbl = "{$db}.form_encounter";
                     $usersTbl =  "{$db}.users";
 
                     $siteTitle = (isset($sitesTitle[$site])) ? $sitesTitle[$site] : $site;
                     $siteStatus = (isset($sitesStatus[$site])) ? $sitesStatus[$site] : 1;
 
-                    $mainQ = " SELECT count(*) as cnt, {$patientTbl}.sex, '".$site."' AS site_id, '".$siteTitle."' AS site_title, '".$siteStatus."' AS site_status FROM {$patientTbl} ";
+                    $mainQ = " SELECT count({$formTbl}.id) as cnt, {$patientTbl}.sex, '".$site."' AS site_id, '".$siteTitle."' AS site_title, '".$siteStatus."' AS site_status FROM {$patientTbl} ";
 
-                    $joinQ = "";
-                    
-                    // $whereQ = " WHERE {$patientTbl}.`date` >= '{$filters['start_date']}' AND {$patientTbl}.`date` <= '{$filters['end_date']}' ";
+                    $joinQ = " INNER JOIN {$formTbl} ON {$patientTbl}.pid = {$formTbl}.pid ";
 
                     $whereQ = " ";
+                    // $whereQ = " WHERE {$formTbl}.`date` >= '{$filters['start_date']}' AND {$formTbl}.`date` <= '{$filters['end_date']}' ";
 
                     $otherQ = " GROUP BY site_id, site_title, {$patientTbl}.sex ";
-                    
+
                     if( isset($filters['site_category']) && !empty($filters['site_category']) ) {
 
                         $userType = (strtolower($filters['site_category']) != "mobile") ? "EHC" : "MOBILE";
@@ -237,49 +194,45 @@ class PatientController extends Controller
 
                     }
 
-
                     $query[] = $mainQ.$joinQ.$whereQ.$otherQ;
+
                 }
 
                 if(!empty($query)) {
                     $joinedQuery = implode(" UNION ALL ", $query);
-                    // $finalQuery = " SELECT SUM(cnt) as total, sex, site_id, site_title FROM ( {$joinedQuery}  ) AS TBL GROUP BY site_id, site_title, sex ";
+                    // $finalQuery = " SELECT SUM(cnt) as total, sex FROM ( {$joinedQuery}  ) AS TBL GROUP BY sex ";
                     $finalQuery = $joinedQuery;
                     $results = DB::select($finalQuery);
-
                     if(!empty($results)) {
-                       foreach($results as $row) {
-                            if(!isset($response['sites'][$row->site_id])) {
-                                $response['sites'][$row->site_id] = [
-                                    'Male' => 0,
-                                    'Female' => 0,
-                                    'Total' => 0
-                                ];
-                            }
-                            $response['sites'][$row->site_id]['siteName'] = $row->site_title;
-                            $response['sites'][$row->site_id]['siteStatus'] = $row->site_status;
-
-                            
-
-                            if($row->sex == "Male") {
-                                $response['sites'][$row->site_id]["Male"] = $row->cnt;
-                                $response['sites'][$row->site_id]["Total"] += $row->cnt;
-                            }else if($row->sex == "Female") {
-                                $response['sites'][$row->site_id]["Female"] = $row->cnt;
-                                $response['sites'][$row->site_id]["Total"] += $row->cnt;
-                            }
-                            
-
-                       }
-                    }
+                        foreach($results as $row) {
+                             if(!isset($response['sites'][$row->site_id])) {
+                                 $response['sites'][$row->site_id] = [
+                                     'Male' => 0,
+                                     'Female' => 0,
+                                     'Total' => 0
+                                 ];
+                             }
+                             $response['sites'][$row->site_id]['siteName'] = $row->site_title;
+                             $response['sites'][$row->site_id]['siteStatus'] = $row->site_status;
+ 
+                             if($row->sex == "Male") {
+                                 $response['sites'][$row->site_id]["Male"] = $row->cnt;
+                                 $response['sites'][$row->site_id]["Total"] += $row->cnt;
+                             }else if($row->sex == "Female") {
+                                 $response['sites'][$row->site_id]["Female"] = $row->cnt;
+                                 $response['sites'][$row->site_id]["Total"] += $row->cnt;
+                             }
+                        }
+                     }
                 }
             }
         }
+
         return $response;
 
 
 
-    }
 
+    }
 
 }

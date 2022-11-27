@@ -78,6 +78,14 @@
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label for="hasmapview" class="col-md-2 control-label col-md-offset-2">Map Visibility</label>
+
+                            <div class="col-md-6">
+                                <input id="hasmapview" type="checkbox" class="form-control" name="hasMapView" value="1" @if($user->hasMapView === "1") checked  @endif >
+                            </div>
+                        </div>
+
 
                         <div class="form-group{{ $errors->has('role') ? ' has-error' : '' }}">
                             <label for="role" class="col-md-2 control-label col-md-offset-2">Select Role</label>
@@ -87,6 +95,7 @@
                                     <option value="admin" @if($user->hasRole('admin')) selected @endif  >Admin</option>
                                     <option value="state"  @if($user->hasRole('state')) selected @endif >State</option>
                                     <option value="site"  @if($user->hasRole('site')) selected @endif>Site</option>
+                                    <option value="partner"  @if($user->hasRole('partner')) selected @endif>Partner</option>
                                 </select>
 
                                 @if ($errors->has('role'))
@@ -96,6 +105,22 @@
                                 @endif
                             </div>
                         </div>
+
+                        <div class="form-group role-assets" id="partner-asset" style="display: none;">
+                            <label for="partners" class="col-md-2 control-label col-md-offset-2">Select Partners</label>
+
+                            <div class="col-md-6">
+                                <select name="partner[]" class="form-control" multiple>
+                                    @if($partners->isNotEmpty())
+                                        @foreach($partners as $partnerType=>$partnerTitle)
+                                            <option value="{{$partnerType}}" @if(in_array($partnerType, $user->realAssetsByRole('partner')->pluck('object_id')->toArray()) ) selected @endif  >{{$partnerTitle}}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                
+                            </div>
+                        </div>
+
 
                         <div class="form-group role-assets" id="state-asset" style="display: none;">
                             <label for="states" class="col-md-2 control-label col-md-offset-2">Select States</label>

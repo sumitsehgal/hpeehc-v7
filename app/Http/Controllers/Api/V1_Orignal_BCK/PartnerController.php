@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Utils\Admin;
 use App\Http\Utils\Project;
-use App\Partner;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -40,11 +39,6 @@ class PartnerController extends Controller
             'partners' => $partners
         ]);
 
-    }
-
-    public function appPartners() {
-        $appPartners = Partner::where('show_on_app', 1)->pluck('name', 'id');
-        return response()->json($appPartners);
     }
 
 }

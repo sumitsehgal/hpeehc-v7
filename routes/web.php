@@ -22,3 +22,16 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->group(function() {
     Route::resource('users', 'Admin\UserController');
 });
+
+Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->group(function() {
+    Route::get('partners/refresh', 'Admin\PartnerController@refresh')->name('partners.refresh');
+    Route::resource('partners', 'Admin\PartnerController');
+});
+
+Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->group(function() {
+    Route::resource('startups', 'Admin\StartupController');
+    Route::resource('studio', 'Admin\StudioController');
+
+
+
+});
